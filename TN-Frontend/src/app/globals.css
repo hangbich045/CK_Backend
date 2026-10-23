@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #284F9E;
+  --color-brand-primary-hover: #1F3F7F;
+  --color-brand-secondary: #1F3F7F;
+  --color-brand-accent: #ECC354;
+  --color-brand-success: #10b981;
+  --color-brand-error: #ef4444;
+  
+  --color-studio-dark: #0F111A;
+  --color-studio-card: #181B26;
+  --color-studio-border: #2B3553;
+  --color-studio-text: #FFFFFF;
+  --color-studio-muted: #B8BECF;
+}
+
+:root {
+  --background: #0F111A;
+  --foreground: #FFFFFF;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utility classes */
+.glass-panel {
+  background: rgba(24, 27, 38, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #2B3553;
+}
+
+.glass-panel-hover {
+  transition: all 0.3s ease;
+}
+
+.glass-panel-hover:hover {
+  background: rgba(24, 27, 38, 0.85);
+  border-color: #ECC354;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #284F9E 0%, #ECC354 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* FullCalendar styling overrides for dark mode */
+.fc {
+  --fc-border-color: #2B3553 !important;
+  --fc-daygrid-event-dot-width: 8px !important;
+  --fc-event-bg-color: rgba(40, 79, 158, 0.2) !important;
+  --fc-event-border-color: rgba(40, 79, 158, 0.6) !important;
+  --fc-event-text-color: #ffffff !important;
+  font-family: inherit;
+}
+
+.fc-theme-standard th {
+  background: rgba(24, 27, 38, 0.8) !important;
+  padding: 12px 4px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: #B8BECF;
+}
+
+.fc-day-today {
+  background: rgba(40, 79, 158, 0.05) !important;
+}
+
+.fc-event {
+  cursor: pointer;
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+  font-weight: 500 !important;
+  font-size: 0.8rem !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.fc-event:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(40, 79, 158, 0.25);
+}
+
+.fc-button-primary {
+  background-color: rgba(24, 27, 38, 0.8) !important;
+  border: 1px solid #2B3553 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  text-transform: capitalize !important;
+}
+
+.fc-button-primary:hover {
+  background-color: rgba(40, 79, 158, 0.2) !important;
+  border-color: rgba(40, 79, 158, 0.4) !important;
+}
+
+.fc-button-active {
+  background-color: #284F9E !important;
+  border-color: #284F9E !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0F111A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(40, 79, 158, 0.4);
+}

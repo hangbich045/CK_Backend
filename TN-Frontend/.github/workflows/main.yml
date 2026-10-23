@@ -1,0 +1,42 @@
+name: Front-end CI/CD Deployment
+
+on:
+  push:
+    branches: [ production ]
+
+jobs:
+  deploy:
+    name: Deploy Next.js Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Production VPS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: 22
+          script: |
+            set -e
+
+            # 1. Load Node/NVM Environment
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            # 2. Navigate to working directory
+            cd /home/webstu-front-end
+
+            # 3. Hard Git Synchronization (Avoid VPS merge conflicts)
+            git checkout production
+            git fetch origin production
+            git reset --hard origin/production
+            git clean -fd -e .env -e .next
+
+            # 4. Install Dependencies & Build Next.js Bundle
+            npm install
+            npm run build
+
+            # 5. Resilient PM2 Process Reload with Fallback Start
+            pm2 reload front --update-env || pm2 start npm --name "front" -- start
+            pm2 save
+

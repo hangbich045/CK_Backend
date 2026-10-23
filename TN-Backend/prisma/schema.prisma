@@ -1,0 +1,147 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  USER
+  COLLABORATOR
+}
+
+enum EquipmentStatus {
+  AVAILABLE
+  BORROWED
+  MAINTENANCE
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RETURNED
+}
+
+model User {
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
+  fullName     String
+  email        String          @unique
+  password     String
+  employeeCode String          @unique
+  role         Role            @default(USER)
+  avatarUrl    String?
+  phone        String?
+  isActive          Boolean  @default(false)
+  verificationToken String?  // 6‑digit OTP
+  tokenExpiresAt    DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  borrowRequests BorrowRequest[]
+  studioBookings StudioBooking[]
+}
+
+model Equipment {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  code              String          @unique
+  name              String
+  category          String
+  description       String
+  image             String
+  quantity          Int
+  availableQuantity Int
+  status            EquipmentStatus @default(AVAILABLE)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model EquipmentCategory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model HomepageContent {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  heroTitle       String
+  heroDescription String
+  heroVideoUrl    String
+  heroPosterUrl   String?
+  aboutContent    String
+  contactInfo     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model HomepageService {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  icon        String
+  color       String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HomepageGallery {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl  String
+  title     String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HomepageSection {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  showHero     Boolean  @default(true)
+  showServices Boolean  @default(true)
+  showGallery  Boolean  @default(true)
+  showAbout    Boolean  @default(true)
+  showContact  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+type BorrowedEquipment {
+  equipmentId String @db.ObjectId
+  quantity    Int
+}
+
+model BorrowRequest {
+  id           String              @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String              @db.ObjectId
+  user         User                @relation(fields: [userId], references: [id])
+  equipments   BorrowedEquipment[]
+  purpose      String
+  borrowDate   DateTime
+  returnDate   DateTime
+  status       RequestStatus       @default(PENDING)
+  rejectReason String?
+  adminNote    String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model StudioBooking {
+  id               String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String        @db.ObjectId
+  user             User          @relation(fields: [userId], references: [id])
+  fullName         String
+  participants     Int
+  purpose          String
+  technicalSupport Boolean
+  startTime        DateTime
+  endTime          DateTime
+  status           RequestStatus @default(PENDING)
+  rejectReason     String?
+  adminNote    String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
