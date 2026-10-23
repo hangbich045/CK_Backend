@@ -7,7 +7,9 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "seed": "node seed.js",
-    "db:sync": "node src/models/index.js"
+    "import:devices": "node import-devices.js",
+    "db:sync": "node src/models/index.js",
+    "test": "node --test test/unit.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

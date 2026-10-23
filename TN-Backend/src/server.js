@@ -25,6 +25,7 @@
 
 require('dotenv').config(); // Bước 1: Load .env trước tất cả
 
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 
@@ -93,6 +94,9 @@ app.use(express.json({ limit: '10mb' })); // Giới hạn payload 10MB
  * extended: true -> hỗ trợ nested objects
  */
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+ 
+// Phục vụ file tĩnh (ảnh fallback, upload local)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // ============================================================
 // ROUTES (Đăng ký các đường dẫn API)
