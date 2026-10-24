@@ -81,8 +81,8 @@ export default function HomePage() {
           });
         }
       }
-    } catch (e) {
-      console.error('Error fetching homepage CMS:', e);
+    } catch (e: any) {
+      console.warn('Lưu ý khi tải nội dung CMS trang chủ:', e?.message || e);
     } finally {
       setLoading(false);
     }

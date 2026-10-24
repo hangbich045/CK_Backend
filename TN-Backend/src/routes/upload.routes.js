@@ -208,7 +208,7 @@ router.post('/auth/avatar', authenticate, (req, res) => {
 // ============================================================
 // POST /api/gallery/upload — Upload ảnh gallery CMS
 // ============================================================
-router.post('/gallery/upload', authenticate, authorize('ADMIN'), (req, res) => {
+router.post(['/gallery/upload', '/homepage-gallery/upload'], authenticate, authorize('ADMIN'), (req, res) => {
   uploadGallery.single('file')(req, res, (err) => {
     if (err) return handleMulterError(err, res);
     if (!req.file) return res.status(400).json({ message: 'Không tìm thấy file.' });
@@ -225,7 +225,7 @@ router.post('/gallery/upload', authenticate, authorize('ADMIN'), (req, res) => {
 // POST /api/cms/upload/video — Upload video CMS
 // POST /api/cms/upload/poster — Upload poster/thumbnail CMS
 // ============================================================
-router.post('/cms/upload/video', authenticate, authorize('ADMIN'), (req, res) => {
+router.post(['/cms/upload/video', '/homepage-content/video'], authenticate, authorize('ADMIN'), (req, res) => {
   uploadVideo.single('file')(req, res, (err) => {
     if (err) return handleMulterError(err, res);
     if (!req.file) return res.status(400).json({ message: 'Không tìm thấy file.' });
@@ -233,7 +233,7 @@ router.post('/cms/upload/video', authenticate, authorize('ADMIN'), (req, res) =>
   });
 });
 
-router.post('/cms/upload/poster', authenticate, authorize('ADMIN'), (req, res) => {
+router.post(['/cms/upload/poster', '/homepage-content/poster'], authenticate, authorize('ADMIN'), (req, res) => {
   uploadGallery.single('file')(req, res, (err) => {
     if (err) return handleMulterError(err, res);
     if (!req.file) return res.status(400).json({ message: 'Không tìm thấy file.' });

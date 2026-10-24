@@ -69,6 +69,12 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',
 ];
 
+// Cho phép Private Network Access cho cả OPTIONS preflight và direct requests
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
+  next();
+});
+
 app.use(cors({
   origin: (origin, callback) => {
     // Cho phép request không có origin (Postman, curl, server-to-server)
@@ -77,7 +83,6 @@ app.use(cors({
     return callback(null, true); // Dev mode: cho phép tất cả
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
   optionsSuccessStatus: 200, // IE11 compat
 }));

@@ -300,110 +300,57 @@
 
 const { Router } = require('express');
 const { authenticate, authorize } = require('../middlewares/auth.middleware');
-const { randomUUID } = require('crypto');
+const cmsStore = require('../services/cms.store');
 
 const router = Router();
 router.use(authenticate, authorize('ADMIN'));
 
 // ============================================================
-// IN-MEMORY STORE (dev only — thay bằng Sequelize Model nếu cần)
-// ============================================================
-let cmsContent = {
-  heroTitle: 'LHU MEDIA STUDIO',
-  heroDescription: 'Hệ thống quản lý đặt lịch và mượn thiết bị studio chuyên nghiệp.',
-  heroVideoUrl: '',
-  heroPosterUrl: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1600&auto=format&fit=crop&q=80',
-  aboutContent: 'LHU Media Studio cung cấp đầy đủ phòng ốc cách âm và trang thiết bị chuyên dụng phục vụ mọi sản phẩm truyền thông.',
-  contactInfo: JSON.stringify({
-    address: 'Trường Đại học Lạc Hồng, 10 Huỳnh Văn Nghệ, Bửu Long, Biên Hòa, Đồng Nai',
-    email: 'media@lhu.edu.vn',
-    phone: '(+84) 251 3952 778',
-    fanpage: 'https://facebook.com/lhu.edu.vn',
-  }),
-};
-
-let cmsSections = {
-  showHero: true,
-  showServices: true,
-  showGallery: true,
-  showAbout: true,
-  showContact: true,
-};
-
-let cmsServices = [
-  { id: '1', title: 'Đặt phòng Studio', description: 'Đặt lịch sử dụng phòng thu âm, phòng quay phim chuyên nghiệp theo giờ hoặc cả ngày.', icon: 'video', color: 'from-brand-primary/10 to-brand-primary/5 border-brand-primary/15', order: 1, isActive: true },
-  { id: '2', title: 'Mượn Thiết bị', description: 'Đăng ký mượn máy ảnh, máy quay, gimbal, đèn chiếu sáng và phụ kiện chuyên dụng.', icon: 'camera', color: 'from-brand-secondary/10 to-brand-secondary/5 border-brand-secondary/15', order: 2, isActive: true },
-  { id: '3', title: 'Hỗ trợ kỹ thuật', description: 'Đội ngũ kỹ thuật viên sẵn sàng hỗ trợ trong suốt quá trình sử dụng thiết bị và phòng.', icon: 'headphones', color: 'from-brand-accent/10 to-brand-accent/5 border-brand-accent/15', order: 3, isActive: true },
-  { id: '4', title: 'Theo dõi lịch sử', description: 'Xem lại toàn bộ lịch sử đặt phòng và mượn thiết bị theo thời gian thực.', icon: 'clock', color: 'from-white/5 to-white/2 border-white/10', order: 4, isActive: true },
-];
-
-let cmsGallery = [
-  { id: '1', imageUrl: 'https://images.unsplash.com/photo-1596443686812-2f45229eebc3?w=800&fit=crop', title: 'Phòng thu âm chuyên nghiệp', order: 1, isActive: true },
-  { id: '2', imageUrl: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&fit=crop', title: 'Studio quay phim', order: 2, isActive: true },
-  { id: '3', imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&fit=crop', title: 'Thiết bị máy ảnh', order: 3, isActive: true },
-  { id: '4', imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&fit=crop', title: 'Hệ thống ánh sáng', order: 4, isActive: true },
-];
-
-// ============================================================
 // HOMEPAGE CONTENT
 // ============================================================
-router.get('/homepage-content', (req, res) => res.json(cmsContent));
+router.get('/homepage-content', (req, res) => res.json(cmsStore.getContent()));
 
 router.put('/homepage-content', (req, res) => {
-  cmsContent = { ...cmsContent, ...req.body };
-  res.json(cmsContent);
+  const updated = cmsStore.updateContent(req.body);
+  res.json(updated);
 });
 
 // ============================================================
 // HOMEPAGE SECTIONS
 // ============================================================
-router.get('/homepage-sections', (req, res) => res.json(cmsSections));
+router.get('/homepage-sections', (req, res) => res.json(cmsStore.getSections()));
 
 router.put('/homepage-sections', (req, res) => {
-  cmsSections = { ...cmsSections, ...req.body };
-  res.json(cmsSections);
+  const updated = cmsStore.updateSections(req.body);
+  res.json(updated);
 });
 
 // ============================================================
 // HOMEPAGE SERVICES
 // ============================================================
 router.get('/homepage-services', (req, res) => {
-  res.json(cmsServices.sort((a, b) => a.order - b.order));
+  res.json(cmsStore.getServices());
 });
 
 router.post('/homepage-services', (req, res) => {
-  const newService = {
-    id: randomUUID(),
-    order: cmsServices.length + 1,
-    isActive: true,
-    ...req.body,
-  };
-  cmsServices.push(newService);
+  const newService = cmsStore.addService(req.body);
   res.status(201).json(newService);
 });
 
 router.put('/homepage-services/reorder', (req, res) => {
-  const { items } = req.body;
-  if (Array.isArray(items)) {
-    items.forEach((item, idx) => {
-      const found = cmsServices.find(s => s.id === item.id);
-      if (found) found.order = idx + 1;
-    });
-  }
-  res.json(cmsServices.sort((a, b) => a.order - b.order));
+  const reordered = cmsStore.reorderServices(req.body.items);
+  res.json(reordered);
 });
 
 router.put('/homepage-services/:id', (req, res) => {
-  const idx = cmsServices.findIndex(s => s.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ message: 'Service không tồn tại.' });
-  cmsServices[idx] = { ...cmsServices[idx], ...req.body };
-  res.json(cmsServices[idx]);
+  const updated = cmsStore.updateService(req.params.id, req.body);
+  if (!updated) return res.status(404).json({ message: 'Service không tồn tại.' });
+  res.json(updated);
 });
 
 router.delete('/homepage-services/:id', (req, res) => {
-  const idx = cmsServices.findIndex(s => s.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ message: 'Service không tồn tại.' });
-  cmsServices.splice(idx, 1);
+  const deleted = cmsStore.deleteService(req.params.id);
+  if (!deleted) return res.status(404).json({ message: 'Service không tồn tại.' });
   res.json({ message: 'Đã xóa service.' });
 });
 
@@ -411,42 +358,28 @@ router.delete('/homepage-services/:id', (req, res) => {
 // HOMEPAGE GALLERY
 // ============================================================
 router.get('/homepage-gallery', (req, res) => {
-  res.json(cmsGallery.sort((a, b) => a.order - b.order));
+  res.json(cmsStore.getGallery());
 });
 
 router.post('/homepage-gallery', (req, res) => {
-  const newItem = {
-    id: randomUUID(),
-    order: cmsGallery.length + 1,
-    isActive: true,
-    ...req.body,
-  };
-  cmsGallery.push(newItem);
+  const newItem = cmsStore.addGalleryItem(req.body);
   res.status(201).json(newItem);
 });
 
 router.put('/homepage-gallery/reorder', (req, res) => {
-  const { items } = req.body;
-  if (Array.isArray(items)) {
-    items.forEach((item, idx) => {
-      const found = cmsGallery.find(g => g.id === item.id);
-      if (found) found.order = idx + 1;
-    });
-  }
-  res.json(cmsGallery.sort((a, b) => a.order - b.order));
+  const reordered = cmsStore.reorderGallery(req.body.items);
+  res.json(reordered);
 });
 
 router.put('/homepage-gallery/:id', (req, res) => {
-  const idx = cmsGallery.findIndex(g => g.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ message: 'Gallery item không tồn tại.' });
-  cmsGallery[idx] = { ...cmsGallery[idx], ...req.body };
-  res.json(cmsGallery[idx]);
+  const updated = cmsStore.updateGalleryItem(req.params.id, req.body);
+  if (!updated) return res.status(404).json({ message: 'Gallery item không tồn tại.' });
+  res.json(updated);
 });
 
 router.delete('/homepage-gallery/:id', (req, res) => {
-  const idx = cmsGallery.findIndex(g => g.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ message: 'Gallery item không tồn tại.' });
-  cmsGallery.splice(idx, 1);
+  const deleted = cmsStore.deleteGalleryItem(req.params.id);
+  if (!deleted) return res.status(404).json({ message: 'Gallery item không tồn tại.' });
   res.json({ message: 'Đã xóa gallery item.' });
 });
 
